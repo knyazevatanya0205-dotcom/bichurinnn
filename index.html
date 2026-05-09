@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Н.Я. Бичурин | Чувашский просветитель | Интерактивная инфографика</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif; background: #FFF8F0; overflow-x: hidden; }
+        .slides-container { width: 300vw; display: flex; transition: transform 0.5s ease-in-out; }
+        .slide { width: 100vw; min-height: 100vh; padding: 35px 55px; overflow-y: auto; }
+        .slide-1 { background: #FFFBF5; }
+        .slide-2 { background: #FFFAF2; }
+        .slide-3 { background: #FFF8EF; }
+        .container { max-width: 1500px; margin: 0 auto; }
+        .hero-flex { display: flex; gap: 50px; align-items: center; margin-bottom: 40px; background: rgba(255,250,240,0.6); border-radius: 48px; padding: 30px 40px; }
+        .portrait-img { width: 200px; height: 210px; border-radius: 50%; object-fit: cover; border: 5px solid #b47c48; box-shadow: 0 12px 24px rgba(0,0,0,0.12); }
+        .hero-text { flex: 1; }
+        h1 { font-size: 3rem; color: #5a2e1a; margin-bottom: 12px; }
+        h2 { font-size: 2rem; color: #7b4a2a; border-left: 6px solid #b47c48; padding-left: 24px; margin: 30px 0 25px; }
+        h3 { font-size: 1.6rem; color: #7b4a2a; margin: 25px 0 15px; }
+        .chuvash-badge { background: #b47c48; display: inline-block; padding: 10px 28px; border-radius: 50px; color: white; font-weight: bold; margin-bottom: 20px; font-size: 1rem; }
+        .timeline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; margin-top: 20px; }
+        .timeline-card { background: white; border-radius: 24px; padding: 22px; box-shadow: 0 8px 18px rgba(0,0,0,0.08); border-left: 6px solid #b47c48; cursor: pointer; transition: 0.3s; }
+        .timeline-card:hover { transform: translateY(-5px); box-shadow: 0 18px 32px rgba(0,0,0,0.12); }
+        .year { font-size: 1.8rem; font-weight: bold; color: #b47c48; margin-bottom: 6px; }
+        .place { color: #6b5a48; font-size: 1rem; margin: 8px 0; }
+        .nav-buttons { position: fixed; bottom: 30px; right: 40px; display: flex; gap: 18px; z-index: 100; }
+        .nav-btn { background: #6b3e1f; color: white; border: none; width: 58px; height: 58px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .nav-btn:hover { background: #8b5a34; transform: scale(1.05); }
+        .page-indicator { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.65); color: white; padding: 10px 26px; border-radius: 40px; font-size: 16px; z-index: 100; }
+        #map { height: 460px; border-radius: 24px; margin-top: 20px; border: 2px solid #c4a27a; background: #e8ddcf; }
+        .work-list { display: flex; flex-wrap: wrap; gap: 18px; margin: 25px 0; }
+        .work-item { background: white; padding: 14px 28px; border-radius: 60px; cursor: pointer; font-weight: 600; font-size: 1rem; box-shadow: 0 3px 8px rgba(0,0,0,0.08); transition: 0.3s; }
+        .work-item:hover { background: #b47c48; color: white; transform: scale(1.02); }
+        .quote { font-style: italic; font-size: 1.3rem; background: white; padding: 28px; border-radius: 30px; margin: 25px 0; text-align: center; border-left: 5px solid #b47c48; border-right: 5px solid #b47c48; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+        .memory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 20px; }
+        .memory-card { background: white; border-radius: 20px; padding: 18px; }
+        .memory-card i { font-size: 2rem; color: #b47c48; margin-bottom: 10px; }
+        .memory-card strong { font-size: 1.1rem; display: block; margin-bottom: 6px; }
+        footer { text-align: center; margin-top: 45px; padding: 20px; color: #6b5a48; }
+        .event-detail-box { margin-top: 22px; padding: 22px; background: #fffdf8; border-radius: 24px; }
+        .modal-toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 38px 42px; border-radius: 48px; max-width: 580px; z-index: 2000; text-align: center; box-shadow: 0 30px 50px rgba(0,0,0,0.35); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); z-index: 1999; }
+        @media (max-width: 1200px) { .slide { padding: 25px 35px; } h1 { font-size: 2.5rem; } .hero-flex { flex-direction: column; text-align: center; } }
+    </style>
+</head>
+<body>
+
+<div class="slides-container" id="slidesContainer">
+    <div class="slide slide-1">
+        <div class="container">
+            <div class="hero-flex">
+                <!-- ФОТО БИЧУРИНА: ПРЯМАЯ РАБОЧАЯ ССЫЛКА -->
+                <img class="portrait-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Bichurin.jpg/250px-Bichurin.jpg" alt="Н.Я. Бичурин">
+                <div class="hero-text">
+                    <div class="chuvash-badge"><i class="fas fa-tree"></i> Сын чувашского народа • 1777–1853</div>
+                    <h1><i class="fas fa-feather-alt"></i> Н.Я. Бичурин<br><small style="font-size: 1.2rem;">Никита Яковлевич Бичурин (архимандрит Иакинф) — великий китаевед</small></h1>
+                    <p style="font-size: 1.1rem; line-height: 1.5;">Монах, переводчик, основоположник российского китаеведения. Родился в Чувашии, прославил русскую науку. Первый европейский учёный, переведший древнекитайские хроники и создавший фундамент для изучения Востока в России.</p>
+                </div>
+            </div>
+            <h2><i class="fas fa-timeline"></i> Хронология жизни</h2>
+            <div class="timeline-grid" id="timelineGrid"></div>
+            <footer><i class="fas fa-arrow-right"></i> Нажмите на событие — карта и детали на 2-м экране</footer>
+        </div>
+    </div>
+
+    <div class="slide slide-2">
+        <div class="container">
+            <h2><i class="fas fa-map-marked-alt"></i> Карта путешествий Бичурина</h2>
+            <div id="map"></div>
+            <div class="event-detail-box">
+                <i class="fas fa-info-circle"></i> <strong id="detailYear">—</strong>
+                <p id="detailDesc" style="margin-top: 10px;">Выберите событие на первом экране, чтобы увидеть его на карте</p>
+                <p id="detailPlace" style="color: #b47c48; margin-top: 8px;"></p>
+            </div>
+            <footer>Маршрут: Чувашия → Казань → Пекин → Кяхта → Санкт-Петербург</footer>
+        </div>
+    </div>
+
+    <div class="slide slide-3">
+        <div class="container">
+            <h2><i class="fas fa-graduation-cap"></i> Научное наследие и память</h2>
+            <div class="quote">«Бичурин открыл для России великую китайскую цивилизацию. Его труды — мост между Востоком и Западом.»</div>
+            <h3><i class="fas fa-book"></i> Главные труды (кликните для подробного описания)</h3>
+            <div class="work-list" id="workList"></div>
+            <h3><i class="fas fa-heart"></i> Память в Чувашии: в честь Бичурина названы</h3>
+            <div class="memory-grid">
+                <div class="memory-card"><i class="fas fa-monument"></i><strong>Памятник в Чебоксарах</strong>Бюст Н.Я. Бичурину на Аллее выдающихся людей.</div>
+                <div class="memory-card"><i class="fas fa-school"></i><strong>Школа имени Бичурина</strong>МБОУ «Бичуринская ООШ» в Чебоксарском районе.</div>
+                <div class="memory-card"><i class="fas fa-street-view"></i><strong>Улица Бичурина</strong>Улицы в Чебоксарах, Цивильске и сёлах Чувашии.</div>
+                <div class="memory-card"><i class="fas fa-calendar-alt"></i><strong>Бичуринские чтения</strong>Ежегодные региональные научные конференции.</div>
+                <div class="memory-card"><i class="fas fa-landmark"></i><strong>Мемориальная доска</strong>В селе Бичурино на здании бывшего училища.</div>
+            </div>
+            <footer><i class="fas fa-star"></i> Чувашский народ гордится своим великим земляком.</footer>
+        </div>
+    </div>
+</div>
+
+<div class="nav-buttons">
+    <button class="nav-btn" onclick="changeSlide(-1)">←</button>
+    <button class="nav-btn" onclick="changeSlide(1)">→</button>
+</div>
+<div class="page-indicator" id="pageIndicator">Экран 1 из 3</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // ДАННЫЕ О СОБЫТИЯХ
+    const events = [
+        { year: 1777, title: "Рождение в Чувашии", desc: "Родился в селе Акулево (ныне — деревня Типнеры, Чебоксарский район) в семье чувашского дьякона. Место, где начался путь великого учёного.", place: "Типнеры, Чувашия", coords: [56.0512, 47.2957] },
+        { year: 1799, title: "Обучение в Казани", desc: "В 1787 году поступил в Казанскую духовную семинарию, где получил фамилию по названию родного села. Окончил семинарию с богословско-философским образованием, владел латынью, греческим, французским и немецким языками.", place: "Казань", coords: [55.7964, 49.1089] },
+        { year: 1802, title: "Монашеский постриг", desc: "18 июля 1800 года в Александро-Невской лавре Санкт-Петербурга принял монашеский постриг с именем Иакинф (в честь святого мученика Иакинфа Римского).", place: "Санкт-Петербург", coords: [59.9211, 30.3856] },
+        { year: 1807, title: "Миссия в Китае", desc: "Назначен начальником 9-й духовной миссии в Пекин. За 14 лет овладел китайским, маньчжурским, тибетским и монгольским языками, перевёл древние хроники, составил словарь на 12 тыс. иероглифов, собрал библиотеку весом 6,5 тонн.", place: "Пекин, Китай", coords: [39.9042, 116.4074] },
+        { year: 1822, title: "Возвращение в Россию", desc: "Вернулся через Сибирь и Кяхту с уникальной коллекцией книг и рукописей — итог многолетних трудов.", place: "Кяхта, Бурятия", coords: [50.3504, 106.4498] },
+        { year: 1828, title: "Член-корреспондент АН", desc: "Избран членом-корреспондентом Российской академии наук по разряду литературы и древностей Востока — официальное признание заслуг в изучении Китая.", place: "Санкт-Петербург", coords: [59.9311, 30.3609] },
+        { year: 1853, title: "Смерть", desc: "11 мая 1853 года на 76-м году жизни скончался. Похоронен на Никольском кладбище Александро-Невской лавры — там, где принимал постриг.", place: "Санкт-Петербург", coords: [59.9211, 30.3856] }
+    ];
+
+    let map, currentMarker, currentPolyline, activeEventIndex = 0;
+    const route = [
+        [56.0512, 47.2957], [55.7964, 49.1089], [59.9211, 30.3856],
+        [39.9042, 116.4074], [50.3504, 106.4498], [59.9211, 30.3856]
+    ];
+
+    function initMap() {
+        // НЕЙТРАЛЬНЫЙ СЛОЙ КАРТЫ — БЕЗ ФЛАГОВ, НА РУССКОМ
+        map = L.map('map').setView([55.0, 75.0], 3.5);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+        currentPolyline = L.polyline(route, { color: '#b47c48', weight: 4, dashArray: '6, 8', opacity: 0.8 }).addTo(map);
+    }
+
+    function showEventOnMap(index) {
+        const ev = events[index];
+        if (!ev) return;
+        activeEventIndex = index;
+        document.getElementById('detailYear').innerHTML = `${ev.year} — ${ev.title}`;
+        document.getElementById('detailDesc').innerHTML = ev.desc;
+        document.getElementById('detailPlace').innerHTML = `<i class="fas fa-location-dot"></i> ${ev.place}`;
+        if (currentMarker) map.removeLayer(currentMarker);
+        const customIcon = L.divIcon({
+            html: `<div style="background:#b47c48;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px white;"><i class="fas fa-map-pin" style="color:white; font-size:20px;"></i></div>`,
+            iconSize: [40, 40]
+        });
+        currentMarker = L.marker(ev.coords, { icon: customIcon }).addTo(map);
+        currentMarker.bindPopup(`<b>${ev.year} г.</b><br>${ev.title}<br>${ev.place}`).openPopup();
+        map.flyTo(ev.coords, 6, { duration: 1.2 });
+    }
+
+    function buildTimeline() {
+        const grid = document.getElementById('timelineGrid');
+        grid.innerHTML = '';
+        events.forEach((ev, idx) => {
+            const card = document.createElement('div');
+            card.className = 'timeline-card';
+            card.innerHTML = `
+                <div class="year">${ev.year}</div>
+                <div style="font-weight:bold; font-size:1.2rem; margin: 6px 0;">${ev.title}</div>
+                <div class="place"><i class="fas fa-map-marker-alt"></i> ${ev.place}</div>
+                <div style="font-size:0.95rem; color:#5e5242; margin-top:10px; line-height:1.4;">${ev.desc.substring(0, 95)}${ev.desc.length > 95 ? '…' : ''}</div>
+                <div style="margin-top:14px;"><i class="fas fa-hand-pointer" style="color:#b47c48;"></i> Кликните → карта и детали</div>
+            `;
+            card.onclick = () => { showEventOnMap(idx); changeSlide(1); };
+            grid.appendChild(card);
+        });
+        showEventOnMap(0);
+    }
+
+    let currentSlide = 0;
+    const slidesContainer = document.getElementById('slidesContainer');
+    window.changeSlide = function(direction) {
+        const newSlide = currentSlide + direction;
+        if (newSlide >= 0 && newSlide < 3) {
+            currentSlide = newSlide;
+            slidesContainer.style.transform = `translateX(-${currentSlide * 100}vw)`;
+            document.getElementById('pageIndicator').innerText = `Экран ${currentSlide + 1} из 3`;
+            if (currentSlide === 1 && map) {
+                setTimeout(() => { map.invalidateSize(); if (activeEventIndex !== undefined) showEventOnMap(activeEventIndex); }, 200);
+            }
+        }
+    };
+
+    // ПОЛНЫЕ ОПИСАНИЯ ТРУДОВ (НИЧЕГО НЕ СОКРАЩЕНО)
+    const worksData = [
+        { name: "📖 Собрание сведений о народах", desc: "Главный трёхтомный труд Бичурина. Переведены с китайского древнейшие сведения о гуннах, сяньбийцах, тюрках и уйгурах. Удостоен Демидовской премии как фундаментальное исследование народов Средней Азии." },
+        { name: "🗺️ Описание Джунгарии и Восточного Туркестана", desc: "Первое в Европе научное описание Джунгарии (Синьцзяна) на основе китайских источников. Классика географии Центральной Азии, не утратившая ценности до сих пор." },
+        { name: "📘 Китайская грамматика", desc: "Первый учебник китайского языка, созданный в России. Положил начало систематическому преподаванию китайского языка в империи и подготовке русских китаеведов." },
+        { name: "🎎 Китай, его жители, нравы, обычаи", desc: "Живое, увлекательное описание повседневной жизни китайцев: традиции, праздники, семья, образование, ремёсла. Книга познакомила русскую публику с настоящим Китаем." },
+        { name: "📜 История ойратов и калмыков", desc: "Фундаментальное исследование истории калмыцкого народа с XV по XIX век на основе китайских и монгольских источников. Отмечено Демидовской премией." }
+    ];
+
+    function showWorkModal(titleText, description) {
+        const existingOverlay = document.querySelector('.modal-overlay');
+        if (existingOverlay) existingOverlay.remove();
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal-toast';
+        modalDiv.innerHTML = `
+            <i class="fas fa-scroll"></i>
+            <strong>${titleText}</strong>
+            <p>${description}</p>
+            <button style="background:#b47c48; border:none; margin-top:22px; padding:12px 32px; border-radius:60px; color:white; font-weight:bold; cursor:pointer; font-size:1rem;">✖ Закрыть</button>
+        `;
+        
+        const closeBtn = modalDiv.querySelector('button');
+        const closeModal = () => {
+            overlay.remove();
+            modalDiv.remove();
+        };
+        closeBtn.onclick = closeModal;
+        overlay.onclick = closeModal;
+        
+        document.body.appendChild(overlay);
+        document.body.appendChild(modalDiv);
+    }
+    
+    function initWorks() {
+        const container = document.getElementById('workList');
+        container.innerHTML = '';
+        worksData.forEach(work => {
+            const btn = document.createElement('div');
+            btn.className = 'work-item';
+            btn.innerHTML = work.name;
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                showWorkModal(work.name, work.desc);
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+        if (e.key === 'ArrowRight') changeSlide(1);
+    });
+
+    window.addEventListener('load', () => {
+        initMap();
+        buildTimeline();
+        initWorks();
+    });
+</script>
+</body>
+</html>
